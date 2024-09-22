@@ -7,7 +7,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Extract keywords from the configuration file
-KEYWORDS = [kw.strip().lower() for kw in config.get('Settings', 'keywords').split(',')]
+KEYWORDS = [kw.strip().lower() for kw in config.get('Settings', 'filterwords').split(',')]
 MAP_FILE = config.get('Settings', 'destination_map_file', fallback='hardlink_mappings.txt')  # Destination map file
 
 # Function to clean the name by removing text in square brackets, parentheses, and specified keywords

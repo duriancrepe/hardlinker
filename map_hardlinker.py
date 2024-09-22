@@ -1,3 +1,4 @@
+
 import os
 import shutil
 import configparser
@@ -10,6 +11,7 @@ config.read('config.ini')
 MAP_FILE = config.get('OMDb', 'destination_map_file', fallback='hardlink_mappings_omdb.txt')
 HARDLINK_LOG_FILE = config.get('Settings', 'hardlink_log_file', fallback='hardlink_log.txt')
 UNKNOWN_ITEMS_MAP_FILE = config.get('Settings', 'unknown_items_map_file', fallback='unknown_items_map.txt')
+MERGE_DUPLICATE_FOLDERS = config.getboolean('Settings', 'merge_duplicate_folders', fallback=False)
 
 def load_map_file(map_file):
     """Load the file-folder map from a text file."""
@@ -27,7 +29,7 @@ def create_hardlink(src, dest):
         return True
     return False
 
-def create_hardlinks_for_folder(src_folder, dest_folder):
+def create_hardlinks_for_folder(src_folder, dest_folder, hardlink_log):
     """Recursively create hardlinks for all files in a folder."""
     for root, _, files in os.walk(src_folder):
         relative_root = os.path.relpath(root, src_folder)
@@ -37,7 +39,11 @@ def create_hardlinks_for_folder(src_folder, dest_folder):
         for file in files:
             src_file = os.path.join(root, file)
             dest_file = os.path.join(dest_root, file)
-            os.link(src_file, dest_file)
+            if not os.path.exists(dest_file):
+                os.link(src_file, dest_file)
+                hardlink_log.write(f"Hardlinked file: {src_file} -> {dest_file}\n")
+            else:
+                hardlink_log.write(f"Skipped existing file: {src_file} -> {dest_file}\n")
 
 def main(source_folder, destination_root_folder):
     # Check if the source folder exists
@@ -57,7 +63,6 @@ def main(source_folder, destination_root_folder):
     os.makedirs(destination_root_folder, exist_ok=True)
 
     unknown_items = []  # List to track unknown items
-    occurrence_count = {}  # Dictionary to track occurrences of each destination item
 
     with open(HARDLINK_LOG_FILE, 'w') as hardlink_log:
         for item in os.listdir(source_folder):
@@ -67,30 +72,33 @@ def main(source_folder, destination_root_folder):
                 dest_name = file_folder_map[item]
                 dest_folder_path = os.path.join(destination_root_folder, dest_name)
 
-                # Count occurrences for folder naming (only for folders)
-                occurrence_count[dest_name] = occurrence_count.get(dest_name, 0) + 1
-                count = occurrence_count[dest_name]
-
-                # Modify the folder destination name by occurrence, but keep the original file name
-                dest_folder_path = f"{dest_folder_path} ({count})" if count > 1 else dest_folder_path
-
                 if os.path.isdir(item_path):
-                    # Skip if the destination folder already exists
-                    if os.path.exists(dest_folder_path):
-                        print(f"Skipping existing folder: {dest_folder_path}")
-                        continue
-                    # Create hardlinks for all files in the folder recursively
-                    create_hardlinks_for_folder(item_path, dest_folder_path)
-                    hardlink_log.write(f"Hardlinked folder: {item_path} -> {dest_folder_path}\n")
+                    if MERGE_DUPLICATE_FOLDERS:
+                        # Always use the same destination folder
+                        os.makedirs(dest_folder_path, exist_ok=True)
+                        create_hardlinks_for_folder(item_path, dest_folder_path, hardlink_log)
+                        hardlink_log.write(f"Hardlinked folder (merged): {item_path} -> {dest_folder_path}\n")
+                    else:
+                        # Use the original behavior with numbered folders
+                        count = 1
+                        while os.path.exists(dest_folder_path):
+                            count += 1
+                            dest_folder_path = f"{os.path.join(destination_root_folder, dest_name)} ({count})"
+                        
+                        create_hardlinks_for_folder(item_path, dest_folder_path, hardlink_log)
+                        hardlink_log.write(f"Hardlinked folder: {item_path} -> {dest_folder_path}\n")
                 else:
                     # Ensure the destination folder for the file exists
                     os.makedirs(dest_folder_path, exist_ok=True)
 
-                    # For files, always use the original file name, without adding occurrences
+                    # For files, always use the original file name
                     dest_file_path = os.path.join(dest_folder_path, item)
 
-                    if create_hardlink(item_path, dest_file_path):
-                        hardlink_log.write(f"Hardlinked file: {item_path} -> {dest_file_path}\n")
+                    if not os.path.exists(dest_file_path):
+                        if create_hardlink(item_path, dest_file_path):
+                            hardlink_log.write(f"Hardlinked file: {item_path} -> {dest_file_path}\n")
+                    else:
+                        hardlink_log.write(f"Skipped existing file: {item_path} -> {dest_file_path}\n")
             else:
                 # Track unmapped items with the original name
                 unknown_items.append(item)
@@ -104,12 +112,12 @@ def main(source_folder, destination_root_folder):
     else:
         print("No unknown items found.")
 
-    print(f"Operation completed. Hardlinks created are logged in {HARDLINK_LOG_FILE}.")
-
+    print(f"Operation completed. Hardlinks created and skipped files are logged in {HARDLINK_LOG_FILE}.")
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
-        print("Usage: python hardlinker.py <source_folder> <destination_root_folder>")
+        print("Usage: python map_hardlinker.py <source_folder> <destination_root_folder>")
     else:
         main(sys.argv[1], sys.argv[2])
+

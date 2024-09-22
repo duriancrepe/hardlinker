@@ -1,3 +1,4 @@
+
 import subprocess
 import configparser
 import os
@@ -28,36 +29,33 @@ def run_mapper(source_folder):
     except subprocess.CalledProcessError as e:
         print(f"Error in mapper: {e}")
 
-def run_omdb_mapper():
-    """Run the omdb_mapper.py script."""
+def run_multi_db_mapper():
+    """Run the multi_db_mapper.py script."""
     try:
-        subprocess.run(['python', 'omdb_mapper.py'], check=True)
-        print("OMDb mapper completed successfully.")
+        subprocess.run(['python', 'multi_db_mapper.py'], check=True)
+        print("Multi-database mapper completed successfully.")
     except subprocess.CalledProcessError as e:
-        print(f"Error in OMDb mapper: {e}")
-
-def run_hardlinker(source_folder, destination_folder):
-    """Run the hardlinker.py script."""
-    try:
-        subprocess.run(['python', 'hardlinker.py', source_folder, destination_folder], check=True)
-        print("Hardlinker completed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error in hardlinker: {e}")
+        print(f"Error in multi-database mapper: {e}")
 
 def main():
     create_output_directories()  # Ensure output directories exist
 
     source_folder = config.get('Settings', 'source_folder')
-
-    # Run the mapping process
-    run_mapper(source_folder)
-    
-    # Run the OMDb mapping
-    run_omdb_mapper()
-    
-    # Run the hardlinking process
     destination_folder = config.get('Settings', 'destination_folder')
-    run_hardlinker(source_folder, destination_folder)
+    use_raw_hardlinker = config.getboolean('Settings', 'use_raw_hardlinker', fallback=False)
+
+    if not use_raw_hardlinker:
+        # Run the mapping process
+        run_mapper(source_folder)
+        
+        # Run the multi-database mapping
+        run_multi_db_mapper()
+        
+        # Run the mapped hardlinking process
+        run_map_hardlinker(source_folder, destination_folder)
+    else:
+        # Run the raw hardlinking process
+        run_raw_hardlinker(source_folder, destination_folder)
 
 if __name__ == "__main__":
     main()
