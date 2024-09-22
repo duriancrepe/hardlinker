@@ -1,0 +1,26 @@
+
+# Ignore the entire output folder
+/output/
+
+# Ignore Python compiled files
+*.pyc
+__pycache__/
+
+# Ignore log files
+*.log
+
+# Ignore configuration files that might contain sensitive information
+config.ini
+
+# Ignore any temporary files
+*.tmp
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore virtual environment folders
+venv/
+env/
+.venv/
+
