@@ -36,7 +36,23 @@ def run_multi_db_mapper():
         print("Multi-database mapper completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error in multi-database mapper: {e}")
+        
+def run_map_hardlinker(source_folder, destination_folder):
+    """Run the map_hardlinker.py script."""
+    try:
+        subprocess.run(['python', 'map_hardlinker.py', source_folder, destination_folder], check=True)
+        print("Mapped hardlinker completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error in mapped hardlinker: {e}")
 
+def run_raw_hardlinker(source_folder, destination_folder):
+    """Run the raw_hardlinker.py script."""
+    try:
+        subprocess.run(['python', 'raw_hardlinker.py', source_folder, destination_folder], check=True)
+        print("Raw hardlinker completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error in raw hardlinker: {e}")
+        
 def main():
     create_output_directories()  # Ensure output directories exist
 
