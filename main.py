@@ -2,6 +2,7 @@
 import subprocess
 import configparser
 import os
+import shutil
 
 # Load configuration from config.ini (INI format)
 config = configparser.ConfigParser()
@@ -20,6 +21,22 @@ def create_output_directories():
 
     output_dir = os.path.dirname(config.get('Settings', 'unknown_items_map_file', fallback='unknown_items_map.txt'))
     os.makedirs(output_dir, exist_ok=True)
+
+def clean_output_dir(folder):
+    """Remove all contents of the specified folder if it exists."""
+    if os.path.exists(folder):
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f'Failed to delete {file_path}. Reason: {e}')
+        print(f"Output directory cleaned: {folder}")
+    else:
+        print(f"Output directory does not exist, will be created: {folder}")
 
 def run_mapper(source_folder):
     """Run the mapper.py script."""
@@ -59,6 +76,13 @@ def main():
     source_folder = config.get('Settings', 'source_folder')
     destination_folder = config.get('Settings', 'destination_folder')
     use_raw_hardlinker = config.getboolean('Settings', 'use_raw_hardlinker', fallback=False)
+    clean_output = config.getboolean('Settings', 'clean_output_dir', fallback=False)
+
+    if clean_output:
+        clean_output_dir(destination_folder)
+
+    # Ensure the destination folder exists
+    os.makedirs(destination_folder, exist_ok=True)
 
     if not use_raw_hardlinker:
         # Run the mapping process
@@ -75,3 +99,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
