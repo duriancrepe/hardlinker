@@ -6,6 +6,9 @@
         "anime (movies)": "/media/hardlinks/anime (movies)"
     },
     "root_default_directory": "/media/hardlinks",
+    "root_mapping": {
+        "/downloads": "/media/downloads"
+    },
     "default_destination": "/media/hardlinks/unsorted"
 }
 

@@ -76,6 +76,14 @@ def get_destination_folder(config, category):
     logging.info(f"Reached end of category parts. Final path: {result}")
     return result
 
+def apply_root_mapping(config, path):
+    for source, dest in config.get('root_mapping', {}).items():
+        if path.startswith(source):
+            mapped_path = path.replace(source, dest, 1)
+            logging.info(f"Applied root mapping: {path} -> {mapped_path}")
+            return mapped_path
+    return path
+
 def main(config_path=None, config_data=None):
     logging.info("Starting qbit_linker...")
     if len(sys.argv) != 3:
@@ -85,25 +93,29 @@ def main(config_path=None, config_data=None):
 
     content_path = sys.argv[1]
     category = sys.argv[2]
-    logging.info(f"Content path: {content_path}")
+    logging.info(f"Original content path: {content_path}")
     logging.info(f"Category: {category}")
 
     config = load_config(config_path, config_data)
     logging.info("Configuration loaded")
+
+    # Apply root mapping to content_path
+    mapped_content_path = apply_root_mapping(config, content_path)
+    logging.info(f"Mapped content path: {mapped_content_path}")
     
     dest_folder = get_destination_folder(config, category)
     logging.info(f"Destination folder: {dest_folder}")
 
-    full_dest_path = os.path.join(dest_folder, os.path.basename(content_path))
+    full_dest_path = os.path.join(dest_folder, os.path.basename(mapped_content_path))
     logging.info(f"Full destination path: {full_dest_path}")
 
     logging.info(f"Creating destination directory: {os.path.dirname(full_dest_path)}")
     os.makedirs(os.path.dirname(full_dest_path), exist_ok=True)
 
     logging.info("Calling raw_hardlinker to create hardlinks...")
-    create_hardlinks(content_path, full_dest_path)
+    create_hardlinks(mapped_content_path, full_dest_path)
 
-    logging.info(f"Hardlinks created: {content_path} -> {full_dest_path}")
+    logging.info(f"Hardlinks created: {mapped_content_path} -> {full_dest_path}")
     logging.info("qbit_linker completed successfully")
 
 if __name__ == "__main__":
