@@ -1,0 +1,12 @@
+
+{
+    "category_map": {
+        "movies": "/media/hardlinks/movies",
+        "shows": "/media/hardlinks/shows",
+        "anime": "/media/hardlinks/anime (shows)",
+        "anime (movies)": "/media/hardlinks/anime (movies)"
+    },
+    "root_default_directory": "/media/hardlinks",
+    "default_destination": "/media/hardlinks/unsorted"
+}
+
