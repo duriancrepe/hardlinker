@@ -24,3 +24,47 @@ venv/
 env/
 .venv/
 
+# Ignore temporary Python files
+*.py[cod]
+*$py.class
+
+# Ignore distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Ignore PyCharm files
+.idea/
+
+# Ignore VS Code files
+.vscode/
+
+# Ignore Jupyter Notebook temporary files
+.ipynb_checkpoints
+
+# Ignore coverage files
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
