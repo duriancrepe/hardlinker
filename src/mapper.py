@@ -5,7 +5,7 @@ import configparser
 
 # Load configuration from config.ini (INI format)
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('../config.ini')
 
 # Extract keywords from the configuration file
 KEYWORDS = [kw.strip().lower() for kw in config.get('Settings', 'filterwords').split(',')]

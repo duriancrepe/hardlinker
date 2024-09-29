@@ -5,7 +5,7 @@ import shutil
 
 # Load configuration from config.ini (INI format)
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('../config.ini')
 
 def create_output_directories():
     """Create output directories for logs and intermediate files."""

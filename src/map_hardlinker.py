@@ -5,7 +5,7 @@ import configparser
 
 # Load configuration from config.ini
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('../config.ini')
 
 # Configuration
 MAP_FILE = config.get('OMDb', 'destination_map_file', fallback='hardlink_mappings_omdb.txt')

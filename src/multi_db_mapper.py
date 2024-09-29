@@ -8,7 +8,7 @@ import re
 
 # Load configuration from config.ini
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('../config.ini')
 
 # Extract OMDb and TMDb settings from the configuration file
 OMDB_API_KEY = config.get('OMDb', 'omdb_api_key')
