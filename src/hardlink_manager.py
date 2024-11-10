@@ -127,7 +127,14 @@ def restore_hardlinks(snapshot_file, non_restored_file="non_restored_hardlinks.j
                             "reason": "Attributes do not match"
                         })
                 else:
-                    # If the target file doesn't exist, create the hard link
+                    # If the target file doesn't exist, ensure parent directories exist and create the hard link
+                    parent_dir = os.path.dirname(target_file)
+
+                    # Ensure the parent directory exists (create it if it doesn't)
+                    if not os.path.exists(parent_dir):
+                        os.makedirs(parent_dir)
+                        print(f"Created parent directory: {parent_dir}")
+    
                     os.link(source_file, target_file)
                     print(f"Created hardlink: {source_file} -> {target_file}")
             
