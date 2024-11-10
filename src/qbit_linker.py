@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from raw_hardlinker import create_hardlinks
 
 # Default path to the configuration file
-DEFAULT_CONFIG_FILE = '/media/hardlinker/config.json'
+DEFAULT_CONFIG_FILE = '../config.json'
 LOG_FILE = 'qbit_linker.log'
 
 # Set up logging
